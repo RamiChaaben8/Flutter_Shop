@@ -13,6 +13,10 @@ part 'list_products.dart';
 
 part 'get_product_by_id.dart';
 
+part 'list_factures.dart';
+
+part 'get_facture_items.dart';
+
 
 
 
@@ -44,6 +48,16 @@ class DefaultConnector {
   
   GetProductByIdVariablesBuilder getProductById ({required String id, }) {
     return GetProductByIdVariablesBuilder(dataConnect, id: id,);
+  }
+  
+  
+  ListFacturesVariablesBuilder listFactures () {
+    return ListFacturesVariablesBuilder(dataConnect, );
+  }
+  
+  
+  GetFactureItemsVariablesBuilder getFactureItems ({required String factureId, }) {
+    return GetFactureItemsVariablesBuilder(dataConnect, factureId: factureId,);
   }
   
 

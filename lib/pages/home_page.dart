@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:project_shop/auth.dart';
 import 'package:project_shop/generated/default.dart';
 import 'package:project_shop/pages/facture_page.dart';
+import 'package:project_shop/pages/facture_history_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -66,6 +67,16 @@ class _HomePageState extends State<HomePage> {
         title: const Text('Shop Dashboard'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.history),
+            tooltip: 'Facture History',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const FactureHistoryPage()),
+              );
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.receipt_long),
             tooltip: 'Create Facture',
             onPressed: () {
@@ -100,6 +111,24 @@ class _HomePageState extends State<HomePage> {
               icon: const Icon(Icons.shopping_cart_checkout),
               label: const Text('Create New Facture'),
               style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                textStyle: const TextStyle(fontSize: 18),
+              ),
+            ),
+            const SizedBox(height: 10),
+            // Navigate to Facture History Button
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const FactureHistoryPage()),
+                );
+              },
+              icon: const Icon(Icons.history),
+              label: const Text('View Facture History'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blueGrey,
+                foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                 textStyle: const TextStyle(fontSize: 18),
               ),

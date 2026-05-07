@@ -15,3 +15,25 @@ query GetProductById($id: String!) @auth(level: USER) {
     price
   }
 }
+
+# Query to list all factures
+query ListFactures @auth(level: USER) {
+  factures(orderBy: [{ createdAt: DESC }]) {
+    id
+    totalPrice
+    createdAt
+  }
+}
+
+# Query to get items of a facture
+query GetFactureItems($factureId: UUID!) @auth(level: USER) {
+  factureItems(where: { factureId: { eq: $factureId } }) {
+    id
+    quantity
+    product {
+      id
+      name
+      price
+    }
+  }
+}

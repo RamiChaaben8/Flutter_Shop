@@ -110,6 +110,96 @@ ref.execute();
 ref.subscribe(...);
 ```
 
+
+### ListFactures
+#### Required Arguments
+```dart
+// No required arguments
+DefaultConnector.instance.listFactures().execute();
+```
+
+
+
+#### Return Type
+`execute()` returns a `QueryResult<ListFacturesData, void>`
+```dart
+/// Result of an Operation Request (query/mutation).
+class OperationResult<Data, Variables> {
+  OperationResult(this.dataConnect, this.data, this.ref);
+  Data data;
+  OperationRef<Data, Variables> ref;
+  FirebaseDataConnect dataConnect;
+}
+
+/// Result of a query request. Created to hold extra variables in the future.
+class QueryResult<Data, Variables> extends OperationResult<Data, Variables> {
+  QueryResult(super.dataConnect, super.data, super.ref);
+}
+
+final result = await DefaultConnector.instance.listFactures();
+ListFacturesData data = result.data;
+final ref = result.ref;
+```
+
+#### Getting the Ref
+Each builder returns an `execute` function, which is a helper function that creates a `Ref` object, and executes the underlying operation.
+An example of how to use the `Ref` object is shown below:
+```dart
+final ref = DefaultConnector.instance.listFactures().ref();
+ref.execute();
+
+ref.subscribe(...);
+```
+
+
+### GetFactureItems
+#### Required Arguments
+```dart
+String factureId = ...;
+DefaultConnector.instance.getFactureItems(
+  factureId: factureId,
+).execute();
+```
+
+
+
+#### Return Type
+`execute()` returns a `QueryResult<GetFactureItemsData, GetFactureItemsVariables>`
+```dart
+/// Result of an Operation Request (query/mutation).
+class OperationResult<Data, Variables> {
+  OperationResult(this.dataConnect, this.data, this.ref);
+  Data data;
+  OperationRef<Data, Variables> ref;
+  FirebaseDataConnect dataConnect;
+}
+
+/// Result of a query request. Created to hold extra variables in the future.
+class QueryResult<Data, Variables> extends OperationResult<Data, Variables> {
+  QueryResult(super.dataConnect, super.data, super.ref);
+}
+
+final result = await DefaultConnector.instance.getFactureItems(
+  factureId: factureId,
+);
+GetFactureItemsData data = result.data;
+final ref = result.ref;
+```
+
+#### Getting the Ref
+Each builder returns an `execute` function, which is a helper function that creates a `Ref` object, and executes the underlying operation.
+An example of how to use the `Ref` object is shown below:
+```dart
+String factureId = ...;
+
+final ref = DefaultConnector.instance.getFactureItems(
+  factureId: factureId,
+).ref();
+ref.execute();
+
+ref.subscribe(...);
+```
+
 ## Mutations
 
 ### AddProduct
