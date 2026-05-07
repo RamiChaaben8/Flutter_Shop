@@ -1,0 +1,18 @@
+# Mutation to add a new product (using the code bar as id)
+mutation AddProduct($id: String!, $name: String!, $price: Float!) @auth(level: USER) {
+  product_insert(data: { id: $id, name: $name, price: $price })
+}
+
+# Mutation to create a new facture
+mutation CreateFacture($totalPrice: Float!) @auth(level: USER) {
+  facture_insert(data: { totalPrice: $totalPrice })
+}
+
+# Mutation to add an item to a facture
+mutation AddFactureItem($factureId: UUID!, $productId: String!, $quantity: Int!) @auth(level: USER) {
+  factureItem_insert(data: {
+    factureId: $factureId,
+    productId: $productId,
+    quantity: $quantity
+  })
+}

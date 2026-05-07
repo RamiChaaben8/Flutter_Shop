@@ -1,0 +1,11 @@
+specVersion: "v1alpha"
+serviceId: "fir-auth-6394d-service"
+location: "us-east4"
+schema:
+  source: "./schema"
+  datasource:
+    postgresql:
+      database: "fir-auth-6394d-database"
+      cloudSql:
+        instanceId: "fir-auth-6394d-instance"
+connectorDirs: ["./connector"]

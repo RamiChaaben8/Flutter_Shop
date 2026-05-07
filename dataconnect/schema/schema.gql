@@ -1,0 +1,21 @@
+# The Product table. The 'id' will be your code bar.
+type Product @table {
+  id: String!
+  name: String!
+  price: Float!
+}
+
+# The Facture (Invoice) table
+type Facture @table {
+  id: UUID! @default(expr: "uuidV4()")
+  totalPrice: Float!
+  createdAt: Timestamp! @default(expr: "request.time")
+}
+
+# The items inside a Facture (Links Factures to Products)
+type FactureItem @table {
+  id: UUID! @default(expr: "uuidV4()")
+  facture: Facture!
+  product: Product!
+  quantity: Int!
+}

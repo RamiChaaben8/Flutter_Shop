@@ -1,0 +1,17 @@
+# Query to list all products
+query ListProducts @auth(level: USER) {
+  products {
+    id
+    name
+    price
+  }
+}
+
+# Query to get a specific product by its code bar (id)
+query GetProductById($id: String!) @auth(level: USER) {
+  product(id: $id) {
+    id
+    name
+    price
+  }
+}
