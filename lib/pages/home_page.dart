@@ -17,7 +17,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final User? user = Auth().currentUser;
-  
+
   final TextEditingController _barcodeController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
@@ -51,20 +51,13 @@ class _HomePageState extends State<HomePage> {
         return;
       }
 
-      // Initialize the generated Data Connect connector
       final DefaultConnector connector = DefaultConnector.instance;
-
-      // Call the GraphQL mutation we defined
-      await connector.addProduct(
-        id: barcode,
-        name: name,
-        price: price,
-      ).execute();
+      await connector.addProduct(id: barcode, name: name, price: price).execute();
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Product added successfully to SQL!')),
+        const SnackBar(content: Text('Product added successfully!')),
       );
-      
+
       _barcodeController.clear();
       _nameController.clear();
       _priceController.clear();
@@ -73,6 +66,16 @@ class _HomePageState extends State<HomePage> {
         SnackBar(content: Text('Error: $e')),
       );
     }
+  }
+
+  /// Opens the fruit scanner in "add to database" mode
+  Future<void> _openFruitScanner() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const FruitScannerPage(mode: FruitScannerMode.addToDatabase),
+      ),
+    );
   }
 
   @override
@@ -84,22 +87,18 @@ class _HomePageState extends State<HomePage> {
           IconButton(
             icon: const Icon(Icons.history),
             tooltip: 'Facture History',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const FactureHistoryPage()),
-              );
-            },
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const FactureHistoryPage()),
+            ),
           ),
           IconButton(
             icon: const Icon(Icons.receipt_long),
             tooltip: 'Create Facture',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const FacturePage()),
-              );
-            },
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const FacturePage()),
+            ),
           ),
           IconButton(
             icon: const Icon(Icons.logout),
@@ -112,91 +111,121 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            Text('Logged in as: ${user?.email ?? 'Unknown'}', style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text(
+              'Logged in as: ${user?.email ?? 'Unknown'}',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 20),
-            
-            // Navigate to Facture Page Button
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
+
+            // Create Facture
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () => Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const FacturePage()),
-                );
-              },
-              icon: const Icon(Icons.shopping_cart_checkout),
-              label: const Text('Create New Facture'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                textStyle: const TextStyle(fontSize: 18),
+                ),
+                icon: const Icon(Icons.shopping_cart_checkout),
+                label: const Text('Create New Facture'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                  textStyle: const TextStyle(fontSize: 18),
+                ),
               ),
             ),
             const SizedBox(height: 10),
-            // Navigate to Facture History Button
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
+
+            // Facture History
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () => Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const FactureHistoryPage()),
-                );
-              },
-              icon: const Icon(Icons.history),
-              label: const Text('View Facture History'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blueGrey,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                textStyle: const TextStyle(fontSize: 18),
+                ),
+                icon: const Icon(Icons.history),
+                label: const Text('View Facture History'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blueGrey,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                  textStyle: const TextStyle(fontSize: 18),
+                ),
               ),
             ),
-            
+
             const Divider(height: 60),
 
-            ElevatedButton.icon(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const FruitScannerPage()),
-                );
-              },
-              icon: const Icon(Icons.animation),
-              label: const Text('Test Fruit Detection'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-                textStyle: const TextStyle(fontSize: 18),
+            // ── Fruit / Veg Section ──
+            const Text(
+              'Fruits & Vegetables',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Use the camera to scan a fruit/veg and set its price per kg.\n'
+              'This saves it to the database so it can be used in invoices.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.grey),
+            ),
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _openFruitScanner,
+                icon: const Icon(Icons.eco),
+                label: const Text('Add / Update Fruit & Veg (by Camera)'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                  textStyle: const TextStyle(fontSize: 16),
+                ),
               ),
             ),
 
-            const SizedBox(height: 30),
-            
-            const Text('Add New Product (To SQL DB)', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Divider(height: 60),
+
+            // ── Regular Product Section ──
+            const Text(
+              'Add New Product (Barcode)',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 10),
             TextField(
               controller: _barcodeController,
               decoration: InputDecoration(
                 labelText: 'Code Bar (ID)',
+                border: const OutlineInputBorder(),
                 suffixIcon: IconButton(
-                  icon: const Icon(Icons.qr_code_scanner,color:Colors.blue),
+                  icon: const Icon(Icons.qr_code_scanner, color: Colors.blue),
                   onPressed: _openScanner,
                   tooltip: 'Scan Barcode',
-
-                )
+                ),
               ),
             ),
+            const SizedBox(height: 8),
             TextField(
               controller: _nameController,
-              decoration: const InputDecoration(labelText: 'Product Name'),
+              decoration: const InputDecoration(
+                labelText: 'Product Name',
+                border: OutlineInputBorder(),
+              ),
             ),
+            const SizedBox(height: 8),
             TextField(
               controller: _priceController,
-              decoration: const InputDecoration(labelText: 'Price'),
+              decoration: const InputDecoration(
+                labelText: 'Price ',
+                border: OutlineInputBorder(),
+              ),
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
             ),
-            const SizedBox(height: 20),
-            ElevatedButton(
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
               onPressed: _addProduct,
-              child: const Text('Save Product'),
+              icon: const Icon(Icons.save),
+              label: const Text('Save Product'),
             ),
           ],
         ),

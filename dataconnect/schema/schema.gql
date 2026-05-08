@@ -5,18 +5,33 @@ type Product @table {
   price: Float!
 }
 
-# The Facture (Invoice) table
+# The Fruit/Vegetable table (scanned by AI camera, sold by weight)
+type Fruit @table {
+  id: String!
+  name: String!
+  pricePerKg: Float!
+}
+
+# The Facture (Invoice) table — userId links it to the authenticated user
 type Facture @table {
   id: UUID! @default(expr: "uuidV4()")
+  userId: String
   totalPrice: Float!
   createdAt: Timestamp! @default(expr: "request.time")
 }
 
-# The items inside a Facture (Links Factures to Products)
+# Regular product items inside a Facture (quantity-based, no nulls)
 type FactureItem @table {
   id: UUID! @default(expr: "uuidV4()")
   facture: Facture!
   product: Product!
-  quantity: Float
-  weight: Float
+  quantity: Float!
+}
+
+# Fruit/veg items inside a Facture (weight-based, no nulls)
+type FactureFruitItem @table {
+  id: UUID! @default(expr: "uuidV4()")
+  facture: Facture!
+  fruit: Fruit!
+  weight: Float!
 }

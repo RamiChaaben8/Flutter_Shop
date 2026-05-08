@@ -3,17 +3,35 @@ mutation AddProduct($id: String!, $name: String!, $price: Float!) @auth(level: U
   product_insert(data: { id: $id, name: $name, price: $price })
 }
 
-# Mutation to create a new facture
-mutation CreateFacture($totalPrice: Float!) @auth(level: USER) {
-  facture_insert(data: { totalPrice: $totalPrice })
+# Mutation to add a new fruit/vegetable
+mutation AddFruit($id: String!, $name: String!, $pricePerKg: Float!) @auth(level: USER) {
+  fruit_insert(data: { id: $id, name: $name, pricePerKg: $pricePerKg })
 }
 
-# Mutation to add an item to a facture
-mutation AddFactureItem($factureId: UUID!, $productId: String!, $quantity: Float, $weight: Float) @auth(level: USER) {
+# Mutation to upsert a fruit (update price if already exists)
+mutation UpsertFruit($id: String!, $name: String!, $pricePerKg: Float!) @auth(level: USER) {
+  fruit_upsert(data: { id: $id, name: $name, pricePerKg: $pricePerKg })
+}
+
+# Mutation to create a new facture (userId links it to the current user)
+mutation CreateFacture($totalPrice: Float!, $userId: String!) @auth(level: USER) {
+  facture_insert(data: { totalPrice: $totalPrice, userId: $userId })
+}
+
+# Mutation to add a regular product item to a facture (quantity required, no nulls)
+mutation AddFactureItem($factureId: UUID!, $productId: String!, $quantity: Float!) @auth(level: USER) {
   factureItem_insert(data: {
     factureId: $factureId,
     productId: $productId,
-    quantity: $quantity,
+    quantity: $quantity
+  })
+}
+
+# Mutation to add a fruit/veg item to a facture (weight required, no nulls)
+mutation AddFactureFruitItem($factureId: UUID!, $fruitId: String!, $weight: Float!) @auth(level: USER) {
+  factureFruitItem_insert(data: {
+    factureId: $factureId,
+    fruitId: $fruitId,
     weight: $weight
   })
 }

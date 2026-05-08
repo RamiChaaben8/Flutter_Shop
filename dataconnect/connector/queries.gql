@@ -16,25 +16,55 @@ query GetProductById($id: String!) @auth(level: USER) {
   }
 }
 
-# Query to list all factures
-query ListFactures @auth(level: USER) {
-  factures(orderBy: [{ createdAt: DESC }]) {
+# Query to list all fruits/vegetables
+query ListFruits @auth(level: USER) {
+  fruits {
+    id
+    name
+    pricePerKg
+  }
+}
+
+# Query to get a specific fruit by its id
+query GetFruitById($id: String!) @auth(level: USER) {
+  fruit(id: $id) {
+    id
+    name
+    pricePerKg
+  }
+}
+
+# Query to list factures for a specific user
+query ListFactures($userId: String!) @auth(level: USER) {
+  factures(where: { userId: { eq: $userId } }, orderBy: [{ createdAt: DESC }]) {
     id
     totalPrice
     createdAt
   }
 }
 
-# Query to get items of a facture
+# Query to get regular product items of a facture
 query GetFactureItems($factureId: UUID!) @auth(level: USER) {
   factureItems(where: { factureId: { eq: $factureId } }) {
     id
     quantity
-    weight
     product {
       id
       name
       price
+    }
+  }
+}
+
+# Query to get fruit/veg items of a facture
+query GetFactureFruitItems($factureId: UUID!) @auth(level: USER) {
+  factureFruitItems(where: { factureId: { eq: $factureId } }) {
+    id
+    weight
+    fruit {
+      id
+      name
+      pricePerKg
     }
   }
 }
