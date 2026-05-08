@@ -163,8 +163,7 @@ class _HomePageState extends State<HomePage> {
             ),
             const SizedBox(height: 8),
             const Text(
-              'Use the camera to scan a fruit/veg and set its price per kg.\n'
-              'This saves it to the database so it can be used in invoices.',
+              '',
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey),
             ),
@@ -174,7 +173,7 @@ class _HomePageState extends State<HomePage> {
               child: ElevatedButton.icon(
                 onPressed: _openFruitScanner,
                 icon: const Icon(Icons.eco),
-                label: const Text('Add / Update Fruit & Veg (by Camera)'),
+                label: const Text('Add / Update Fruit & Veg'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
                   foregroundColor: Colors.white,

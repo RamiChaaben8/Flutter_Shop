@@ -297,9 +297,9 @@ class _FacturePageState extends State<FacturePage> {
               child: ElevatedButton.icon(
                 onPressed: _isLoading ? null : _openFruitScanner,
                 icon: const Icon(Icons.eco),
-                label: const Text('Scan Fruit / Veg (by Weight)'),
+                label: const Text('Scan Fruit / Veg '),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.orange,
+                  backgroundColor: Colors.green,
                   foregroundColor: Colors.white,
                 ),
               ),
