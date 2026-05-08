@@ -5,6 +5,7 @@ import 'package:project_shop/generated/default.dart';
 import 'package:project_shop/pages/facture_page.dart';
 import 'package:project_shop/pages/facture_history_page.dart';
 import 'package:project_shop/pages/scanner_page.dart';
+import 'package:project_shop/pages/fruit_scanner_page.dart';
 
 
 class HomePage extends StatefulWidget {
@@ -149,6 +150,25 @@ class _HomePageState extends State<HomePage> {
             ),
             
             const Divider(height: 60),
+
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const FruitScannerPage()),
+                );
+              },
+              icon: const Icon(Icons.animation),
+              label: const Text('Test Fruit Detection'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                textStyle: const TextStyle(fontSize: 18),
+              ),
+            ),
+
+            const SizedBox(height: 30),
             
             const Text('Add New Product (To SQL DB)', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 10),

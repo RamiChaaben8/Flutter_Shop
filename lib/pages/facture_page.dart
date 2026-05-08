@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:project_shop/generated/default.dart';
 import 'package:project_shop/pages/scanner_page.dart';
+import 'package:project_shop/pages/fruit_scanner_page.dart';
 
 class FacturePage extends StatefulWidget {
   const FacturePage({super.key});
@@ -36,7 +37,7 @@ class _FacturePageState extends State<FacturePage> {
         );
       } else {
         // 2. Add to local list or increment quantity if it exists
-        final existingItemIndex = _factureItems.indexWhere((item) => item['id'] == product.id);
+        final existingItemIndex = _factureItems.indexWhere((item) => item['id'] == product.id && !item.containsKey('weight'));
         
         setState(() {
           if (existingItemIndex >= 0) {
@@ -74,9 +75,73 @@ class _FacturePageState extends State<FacturePage> {
     }
   }
 
+  // Open the fruit scanner and process result
+  Future<void> _openFruitScanner() async {
+    final result = await Navigator.push<Map<String, dynamic>>(
+      context,
+      MaterialPageRoute(builder: (context) => const FruitScannerPage()),
+    );
+
+    if (result != null) {
+      final double? weight = await _showWeightDialog(result['name'], result['price']);
+      if (weight != null && weight > 0) {
+        setState(() {
+          _factureItems.add({
+            'id': result['id'],
+            'name': result['name'],
+            'price': result['price'],
+            'quantity': 1,
+            'weight': weight,
+          });
+        });
+      }
+    }
+  }
+
+  Future<double?> _showWeightDialog(String name, double price) async {
+    final controller = TextEditingController();
+    return showDialog<double>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Enter weight for $name'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('Price: \$${price.toStringAsFixed(2)}/kg'),
+            const SizedBox(height: 10),
+            TextField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Weight (kg)',
+                border: OutlineInputBorder(),
+              ),
+              autofocus: true,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: () {
+              final val = double.tryParse(controller.text);
+              Navigator.pop(context, val);
+            },
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
+  }
+
   // Calculate total price
   double get _totalPrice {
-    return _factureItems.fold(0.0, (sum, item) => sum + (item['price'] * item['quantity']));
+    return _factureItems.fold(0.0, (sum, item) {
+      if (item.containsKey('weight')) {
+        return sum + (item['price'] * item['weight']);
+      }
+      return sum + (item['price'] * item['quantity']);
+    });
   }
 
   // Save Facture to Database
@@ -123,7 +188,7 @@ class _FacturePageState extends State<FacturePage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Input row with scanner button
+            // Input row with scanner buttons
             Row(
               children: [
                 Expanded(
@@ -141,12 +206,25 @@ class _FacturePageState extends State<FacturePage> {
                     onSubmitted: (value) => _addProductToFacture(),
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 8),
                 ElevatedButton(
                   onPressed: _isLoading ? null : () => _addProductToFacture(),
                   child: const Text('Add'),
                 ),
               ],
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _isLoading ? null : _openFruitScanner,
+                icon: const Icon(Icons.eco),
+                label: const Text('Scan Fruit/Veg (by Weight)'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  foregroundColor: Colors.white,
+                ),
+              ),
             ),
             const SizedBox(height: 20),
             
@@ -156,43 +234,78 @@ class _FacturePageState extends State<FacturePage> {
                 itemCount: _factureItems.length,
                 itemBuilder: (context, index) {
                   final item = _factureItems[index];
-                  return ListTile(
-                    title: Text(item['name']),
-                    subtitle: Text('Code: ${item['id']} | Price: \$${item['price']}'),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.remove_circle_outline, color: Colors.orange),
-                          onPressed: () {
-                            setState(() {
-                              if (item['quantity'] > 1) {
-                                item['quantity'] -= 1;
-                              } else {
+                  final isWeightBased = item.containsKey('weight');
+                  final double price = item['price'];
+                  final double quantity = isWeightBased ? item['weight'] : item['quantity'].toDouble();
+                  final double amount = price * quantity;
+
+                  return Card(
+                    margin: const EdgeInsets.symmetric(vertical: 4),
+                    child: ListTile(
+                      title: Text(item['name'], style: const TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Code: ${item['id']}'),
+                          Text(
+                            isWeightBased 
+                                ? 'Price: \$${price.toStringAsFixed(2)}/kg | Weight: ${item['weight']}kg'
+                                : 'Price: \$${price.toStringAsFixed(2)} | Qty: ${item['quantity']}',
+                          ),
+                          Text(
+                            'Amount: \$${amount.toStringAsFixed(2)}',
+                            style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
+                          ),
+                        ],
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (!isWeightBased) ...[
+                            IconButton(
+                              icon: const Icon(Icons.remove_circle_outline, color: Colors.orange),
+                              onPressed: () {
+                                setState(() {
+                                  if (item['quantity'] > 1) {
+                                    item['quantity'] -= 1;
+                                  } else {
+                                    _factureItems.removeAt(index);
+                                  }
+                                });
+                              },
+                            ),
+                            Text('${item['quantity']}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                            IconButton(
+                              icon: const Icon(Icons.add_circle_outline, color: Colors.green),
+                              onPressed: () {
+                                setState(() {
+                                  item['quantity'] += 1;
+                                });
+                              },
+                            ),
+                          ] else 
+                            IconButton(
+                              icon: const Icon(Icons.edit, color: Colors.blue),
+                              onPressed: () async {
+                                final newWeight = await _showWeightDialog(item['name'], item['price']);
+                                if (newWeight != null && newWeight > 0) {
+                                  setState(() {
+                                    item['weight'] = newWeight;
+                                  });
+                                }
+                              },
+                            ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () {
+                              setState(() {
                                 _factureItems.removeAt(index);
-                              }
-                            });
-                          },
-                        ),
-                        Text('${item['quantity']}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                        IconButton(
-                          icon: const Icon(Icons.add_circle_outline, color: Colors.green),
-                          onPressed: () {
-                            setState(() {
-                              item['quantity'] += 1;
-                            });
-                          },
-                        ),
-                        const SizedBox(width: 8),
-                        IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () {
-                            setState(() {
-                              _factureItems.removeAt(index);
-                            });
-                          },
-                        ),
-                      ],
+                              });
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 },
