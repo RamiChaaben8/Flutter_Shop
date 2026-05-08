@@ -162,7 +162,28 @@ class _FacturePageState extends State<FacturePage> {
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text('x${item['quantity']}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        IconButton(
+                          icon: const Icon(Icons.remove_circle_outline, color: Colors.orange),
+                          onPressed: () {
+                            setState(() {
+                              if (item['quantity'] > 1) {
+                                item['quantity'] -= 1;
+                              } else {
+                                _factureItems.removeAt(index);
+                              }
+                            });
+                          },
+                        ),
+                        Text('${item['quantity']}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                        IconButton(
+                          icon: const Icon(Icons.add_circle_outline, color: Colors.green),
+                          onPressed: () {
+                            setState(() {
+                              item['quantity'] += 1;
+                            });
+                          },
+                        ),
+                        const SizedBox(width: 8),
                         IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
                           onPressed: () {

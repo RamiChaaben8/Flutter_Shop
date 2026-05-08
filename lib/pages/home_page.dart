@@ -4,6 +4,8 @@ import 'package:project_shop/auth.dart';
 import 'package:project_shop/generated/default.dart';
 import 'package:project_shop/pages/facture_page.dart';
 import 'package:project_shop/pages/facture_history_page.dart';
+import 'package:project_shop/pages/scanner_page.dart';
+
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -21,6 +23,18 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> signOut() async {
     await Auth().signOut();
+  }
+
+  Future<void> _openScanner() async {
+    final scannedCode = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(builder: (context) => const ScannerPage()),
+    );
+
+    if (scannedCode != null && scannedCode.isNotEmpty) {
+      _barcodeController.text = scannedCode;
+      await _addProduct();
+    }
   }
 
   Future<void> _addProduct() async {
@@ -140,7 +154,15 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(height: 10),
             TextField(
               controller: _barcodeController,
-              decoration: const InputDecoration(labelText: 'Code Bar (ID)'),
+              decoration: InputDecoration(
+                labelText: 'Code Bar (ID)',
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.qr_code_scanner,color:Colors.blue),
+                  onPressed: _openScanner,
+                  tooltip: 'Scan Barcode',
+
+                )
+              ),
             ),
             TextField(
               controller: _nameController,
