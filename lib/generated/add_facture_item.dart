@@ -3,10 +3,10 @@ part of 'default.dart';
 class AddFactureItemVariablesBuilder {
   String factureId;
   String productId;
-  Optional<int> _quantity = Optional.optional(nativeFromJson, nativeToJson);
+  Optional<double> _quantity = Optional.optional(nativeFromJson, nativeToJson);
   Optional<double> _weight = Optional.optional(nativeFromJson, nativeToJson);
 
-  final FirebaseDataConnect _dataConnect;  AddFactureItemVariablesBuilder quantity(int? t) {
+  final FirebaseDataConnect _dataConnect;  AddFactureItemVariablesBuilder quantity(double? t) {
    _quantity.value = t;
    return this;
   }
@@ -100,7 +100,7 @@ class AddFactureItemData {
 class AddFactureItemVariables {
   final String factureId;
   final String productId;
-  late final Optional<int>quantity;
+  late final Optional<double>quantity;
   late final Optional<double>weight;
   @Deprecated('fromJson is deprecated for Variable classes as they are no longer required for deserialization.')
   AddFactureItemVariables.fromJson(Map<String, dynamic> json):
@@ -112,7 +112,7 @@ class AddFactureItemVariables {
   
   
     quantity = Optional.optional(nativeFromJson, nativeToJson);
-    quantity.value = json['quantity'] == null ? null : nativeFromJson<int>(json['quantity']);
+    quantity.value = json['quantity'] == null ? null : nativeFromJson<double>(json['quantity']);
   
   
     weight = Optional.optional(nativeFromJson, nativeToJson);

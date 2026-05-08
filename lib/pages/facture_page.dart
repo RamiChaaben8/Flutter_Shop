@@ -209,10 +209,12 @@ class _FacturePageState extends State<FacturePage> {
             final double w = (item['weight'] as num).toDouble();
             debugPrint('Adding weight-based item: $w kg');
             itemMutation.weight(w);
+            itemMutation.quantity(null);
           } else {
-            final int q = (item['quantity'] as num).toInt();
+            final double q = (item['quantity'] as num).toDouble();
             debugPrint('Adding quantity-based item: $q units');
             itemMutation.quantity(q);
+            itemMutation.weight(null);
           }
           
           await itemMutation.execute();
@@ -227,8 +229,10 @@ class _FacturePageState extends State<FacturePage> {
             var retryMutation = _connector.addFactureItem(factureId: factureId, productId: productId);
             if (isWeightBased) {
               retryMutation.weight((item['weight'] as num).toDouble());
+              retryMutation.quantity(null);
             } else {
-              retryMutation.quantity((item['quantity'] as num).toInt());
+              retryMutation.quantity((item['quantity'] as num).toDouble());
+              retryMutation.weight(null);
             }
             await retryMutation.execute();
           } else {

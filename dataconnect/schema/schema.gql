@@ -17,6 +17,6 @@ type FactureItem @table {
   id: UUID! @default(expr: "uuidV4()")
   facture: Facture!
   product: Product!
-  quantity: Int
+  quantity: Float
   weight: Float
 }

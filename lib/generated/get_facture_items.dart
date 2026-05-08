@@ -20,13 +20,13 @@ class GetFactureItemsVariablesBuilder {
 @immutable
 class GetFactureItemsFactureItems {
   final String id;
-  final int? quantity;
+  final double? quantity;
   final double? weight;
   final GetFactureItemsFactureItemsProduct product;
   GetFactureItemsFactureItems.fromJson(dynamic json):
   
   id = nativeFromJson<String>(json['id']),
-  quantity = json['quantity'] == null ? null : nativeFromJson<int>(json['quantity']),
+  quantity = json['quantity'] == null ? null : nativeFromJson<double>(json['quantity']),
   weight = json['weight'] == null ? null : nativeFromJson<double>(json['weight']),
   product = GetFactureItemsFactureItemsProduct.fromJson(json['product']);
   @override
@@ -53,7 +53,7 @@ class GetFactureItemsFactureItems {
     Map<String, dynamic> json = {};
     json['id'] = nativeToJson<String>(id);
     if (quantity != null) {
-      json['quantity'] = nativeToJson<int?>(quantity);
+      json['quantity'] = nativeToJson<double?>(quantity);
     }
     if (weight != null) {
       json['weight'] = nativeToJson<double?>(weight);
