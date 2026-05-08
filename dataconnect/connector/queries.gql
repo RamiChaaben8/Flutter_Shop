@@ -30,6 +30,7 @@ query GetFactureItems($factureId: UUID!) @auth(level: USER) {
   factureItems(where: { factureId: { eq: $factureId } }) {
     id
     quantity
+    weight
     product {
       id
       name

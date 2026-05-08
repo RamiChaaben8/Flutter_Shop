@@ -3,10 +3,19 @@ part of 'default.dart';
 class AddFactureItemVariablesBuilder {
   String factureId;
   String productId;
-  int quantity;
+  Optional<int> _quantity = Optional.optional(nativeFromJson, nativeToJson);
+  Optional<double> _weight = Optional.optional(nativeFromJson, nativeToJson);
 
-  final FirebaseDataConnect _dataConnect;
-  AddFactureItemVariablesBuilder(this._dataConnect, {required  this.factureId,required  this.productId,required  this.quantity,});
+  final FirebaseDataConnect _dataConnect;  AddFactureItemVariablesBuilder quantity(int? t) {
+   _quantity.value = t;
+   return this;
+  }
+  AddFactureItemVariablesBuilder weight(double? t) {
+   _weight.value = t;
+   return this;
+  }
+
+  AddFactureItemVariablesBuilder(this._dataConnect, {required  this.factureId,required  this.productId,});
   Deserializer<AddFactureItemData> dataDeserializer = (dynamic json)  => AddFactureItemData.fromJson(jsonDecode(json));
   Serializer<AddFactureItemVariables> varsSerializer = (AddFactureItemVariables vars) => jsonEncode(vars.toJson());
   Future<OperationResult<AddFactureItemData, AddFactureItemVariables>> execute() {
@@ -14,7 +23,7 @@ class AddFactureItemVariablesBuilder {
   }
 
   MutationRef<AddFactureItemData, AddFactureItemVariables> ref() {
-    AddFactureItemVariables vars= AddFactureItemVariables(factureId: factureId,productId: productId,quantity: quantity,);
+    AddFactureItemVariables vars= AddFactureItemVariables(factureId: factureId,productId: productId,quantity: _quantity,weight: _weight,);
     return _dataConnect.mutation("AddFactureItem", dataDeserializer, varsSerializer, vars);
   }
 }
@@ -91,13 +100,25 @@ class AddFactureItemData {
 class AddFactureItemVariables {
   final String factureId;
   final String productId;
-  final int quantity;
+  late final Optional<int>quantity;
+  late final Optional<double>weight;
   @Deprecated('fromJson is deprecated for Variable classes as they are no longer required for deserialization.')
   AddFactureItemVariables.fromJson(Map<String, dynamic> json):
   
   factureId = nativeFromJson<String>(json['factureId']),
-  productId = nativeFromJson<String>(json['productId']),
-  quantity = nativeFromJson<int>(json['quantity']);
+  productId = nativeFromJson<String>(json['productId']) {
+  
+  
+  
+  
+    quantity = Optional.optional(nativeFromJson, nativeToJson);
+    quantity.value = json['quantity'] == null ? null : nativeFromJson<int>(json['quantity']);
+  
+  
+    weight = Optional.optional(nativeFromJson, nativeToJson);
+    weight.value = json['weight'] == null ? null : nativeFromJson<double>(json['weight']);
+  
+  }
   @override
   bool operator ==(Object other) {
     if(identical(this, other)) {
@@ -110,18 +131,24 @@ class AddFactureItemVariables {
     final AddFactureItemVariables otherTyped = other as AddFactureItemVariables;
     return factureId == otherTyped.factureId && 
     productId == otherTyped.productId && 
-    quantity == otherTyped.quantity;
+    quantity == otherTyped.quantity && 
+    weight == otherTyped.weight;
     
   }
   @override
-  int get hashCode => Object.hashAll([factureId.hashCode, productId.hashCode, quantity.hashCode]);
+  int get hashCode => Object.hashAll([factureId.hashCode, productId.hashCode, quantity.hashCode, weight.hashCode]);
   
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> json = {};
     json['factureId'] = nativeToJson<String>(factureId);
     json['productId'] = nativeToJson<String>(productId);
-    json['quantity'] = nativeToJson<int>(quantity);
+    if(quantity.state == OptionalState.set) {
+      json['quantity'] = quantity.toJson();
+    }
+    if(weight.state == OptionalState.set) {
+      json['weight'] = weight.toJson();
+    }
     return json;
   }
 
@@ -129,6 +156,7 @@ class AddFactureItemVariables {
     required this.factureId,
     required this.productId,
     required this.quantity,
+    required this.weight,
   });
 }
 

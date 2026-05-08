@@ -20,12 +20,14 @@ class GetFactureItemsVariablesBuilder {
 @immutable
 class GetFactureItemsFactureItems {
   final String id;
-  final int quantity;
+  final int? quantity;
+  final double? weight;
   final GetFactureItemsFactureItemsProduct product;
   GetFactureItemsFactureItems.fromJson(dynamic json):
   
   id = nativeFromJson<String>(json['id']),
-  quantity = nativeFromJson<int>(json['quantity']),
+  quantity = json['quantity'] == null ? null : nativeFromJson<int>(json['quantity']),
+  weight = json['weight'] == null ? null : nativeFromJson<double>(json['weight']),
   product = GetFactureItemsFactureItemsProduct.fromJson(json['product']);
   @override
   bool operator ==(Object other) {
@@ -39,24 +41,31 @@ class GetFactureItemsFactureItems {
     final GetFactureItemsFactureItems otherTyped = other as GetFactureItemsFactureItems;
     return id == otherTyped.id && 
     quantity == otherTyped.quantity && 
+    weight == otherTyped.weight && 
     product == otherTyped.product;
     
   }
   @override
-  int get hashCode => Object.hashAll([id.hashCode, quantity.hashCode, product.hashCode]);
+  int get hashCode => Object.hashAll([id.hashCode, quantity.hashCode, weight.hashCode, product.hashCode]);
   
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> json = {};
     json['id'] = nativeToJson<String>(id);
-    json['quantity'] = nativeToJson<int>(quantity);
+    if (quantity != null) {
+      json['quantity'] = nativeToJson<int?>(quantity);
+    }
+    if (weight != null) {
+      json['weight'] = nativeToJson<double?>(weight);
+    }
     json['product'] = product.toJson();
     return json;
   }
 
   GetFactureItemsFactureItems({
     required this.id,
-    required this.quantity,
+    this.quantity,
+    this.weight,
     required this.product,
   });
 }

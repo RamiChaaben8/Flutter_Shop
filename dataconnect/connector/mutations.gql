@@ -9,10 +9,11 @@ mutation CreateFacture($totalPrice: Float!) @auth(level: USER) {
 }
 
 # Mutation to add an item to a facture
-mutation AddFactureItem($factureId: UUID!, $productId: String!, $quantity: Int!) @auth(level: USER) {
+mutation AddFactureItem($factureId: UUID!, $productId: String!, $quantity: Int, $weight: Float) @auth(level: USER) {
   factureItem_insert(data: {
     factureId: $factureId,
     productId: $productId,
-    quantity: $quantity
+    quantity: $quantity,
+    weight: $weight
   })
 }

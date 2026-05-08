@@ -301,15 +301,37 @@ ref.execute();
 ```dart
 String factureId = ...;
 String productId = ...;
-int quantity = ...;
 DefaultConnector.instance.addFactureItem(
   factureId: factureId,
   productId: productId,
-  quantity: quantity,
 ).execute();
 ```
 
+#### Optional Arguments
+We return a builder for each query. For AddFactureItem, we created `AddFactureItemBuilder`. For queries and mutations with optional parameters, we return a builder class.
+The builder pattern allows Data Connect to distinguish between fields that haven't been set and fields that have been set to null. A field can be set by calling its respective setter method like below:
+```dart
+class AddFactureItemVariablesBuilder {
+  ...
+   AddFactureItemVariablesBuilder quantity(int? t) {
+   _quantity.value = t;
+   return this;
+  }
+  AddFactureItemVariablesBuilder weight(double? t) {
+   _weight.value = t;
+   return this;
+  }
 
+  ...
+}
+DefaultConnector.instance.addFactureItem(
+  factureId: factureId,
+  productId: productId,
+)
+.quantity(quantity)
+.weight(weight)
+.execute();
+```
 
 #### Return Type
 `execute()` returns a `OperationResult<AddFactureItemData, AddFactureItemVariables>`
@@ -325,7 +347,6 @@ class OperationResult<Data, Variables> {
 final result = await DefaultConnector.instance.addFactureItem(
   factureId: factureId,
   productId: productId,
-  quantity: quantity,
 );
 AddFactureItemData data = result.data;
 final ref = result.ref;
@@ -337,12 +358,10 @@ An example of how to use the `Ref` object is shown below:
 ```dart
 String factureId = ...;
 String productId = ...;
-int quantity = ...;
 
 final ref = DefaultConnector.instance.addFactureItem(
   factureId: factureId,
   productId: productId,
-  quantity: quantity,
 ).ref();
 ref.execute();
 ```

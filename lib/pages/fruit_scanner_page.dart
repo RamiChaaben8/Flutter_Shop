@@ -107,10 +107,12 @@ class _FruitScannerPageState extends State<FruitScannerPage> {
 
     try {
       final String name = _detectedFruit;
+      // Use a consistent ID based on the name so it doesn't re-add every time
+      final String id = "FRUIT_${name.toUpperCase().replaceAll(' ', '_')}";
       final double price = (Random().nextDouble() * 5 + 1); // Price between 1 and 6
 
       Navigator.pop(context, {
-        'id': "FRUIT_${Random().nextInt(100000)}",
+        'id': id,
         'name': name,
         'price': price,
       });

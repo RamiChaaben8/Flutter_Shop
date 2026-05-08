@@ -36,8 +36,8 @@ class DefaultConnector {
   }
   
   
-  AddFactureItemVariablesBuilder addFactureItem ({required String factureId, required String productId, required int quantity, }) {
-    return AddFactureItemVariablesBuilder(dataConnect, factureId: factureId,productId: productId,quantity: quantity,);
+  AddFactureItemVariablesBuilder addFactureItem ({required String factureId, required String productId, }) {
+    return AddFactureItemVariablesBuilder(dataConnect, factureId: factureId,productId: productId,);
   }
   
   

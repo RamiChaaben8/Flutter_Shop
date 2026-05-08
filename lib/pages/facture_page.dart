@@ -36,21 +36,38 @@ class _FacturePageState extends State<FacturePage> {
           const SnackBar(content: Text('Product not found! Please add it first.')),
         );
       } else {
-        // 2. Add to local list or increment quantity if it exists
-        final existingItemIndex = _factureItems.indexWhere((item) => item['id'] == product.id && !item.containsKey('weight'));
-        
-        setState(() {
-          if (existingItemIndex >= 0) {
-            _factureItems[existingItemIndex]['quantity'] += 1;
-          } else {
-            _factureItems.add({
-              'id': product.id,
-              'name': product.name,
-              'price': product.price,
-              'quantity': 1,
+        // Check if it's a fruit/veg (ID starts with FRUIT_)
+        if (product.id.startsWith('FRUIT_')) {
+          setState(() => _isLoading = false); // Stop loading to show dialog
+          final double? weight = await _showWeightDialog(product.name, product.price);
+          if (weight != null && weight > 0) {
+            setState(() {
+              _factureItems.add({
+                'id': product.id,
+                'name': product.name,
+                'price': product.price,
+                'quantity': 1,
+                'weight': weight,
+              });
             });
           }
-        });
+        } else {
+          // Regular barcode product
+          final existingItemIndex = _factureItems.indexWhere((item) => item['id'] == product.id && !item.containsKey('weight'));
+          
+          setState(() {
+            if (existingItemIndex >= 0) {
+              _factureItems[existingItemIndex]['quantity'] += 1;
+            } else {
+              _factureItems.add({
+                'id': product.id,
+                'name': product.name,
+                'price': product.price,
+                'quantity': 1,
+              });
+            }
+          });
+        }
         _barcodeController.clear();
       }
     } catch (e) {
@@ -149,21 +166,78 @@ class _FacturePageState extends State<FacturePage> {
     if (_factureItems.isEmpty) return;
 
     setState(() => _isLoading = true);
+    debugPrint('Starting to save facture with ${_factureItems.length} items');
     
     try {
       // 1. Create Facture entry
-      final factureResponse = await _connector.createFacture(totalPrice: _totalPrice).execute();
-      final factureId = factureResponse.data.facture_insert.id;
+      final double total = _totalPrice;
+      debugPrint('Creating facture with total: \$${total.toStringAsFixed(2)}');
+      
+      final factureResponse = await _connector.createFacture(totalPrice: total).execute();
+      final String factureId = factureResponse.data.facture_insert.id;
+      debugPrint('Facture created with ID: $factureId');
 
       // 2. Loop through all items and save them linking to factureId
       for (var item in _factureItems) {
-        await _connector.addFactureItem(
-          factureId: factureId,
-          productId: item['id'],
-          quantity: item['quantity'],
-        ).execute();
+        final String productId = item['id'].toString();
+        final String productName = item['name'].toString();
+        final double productPrice = (item['price'] as num).toDouble();
+        
+        debugPrint('Processing item: $productName (ID: $productId)');
+
+        try {
+          // Ensure product exists
+          final productCheck = await _connector.getProductById(id: productId).execute();
+          
+          if (productCheck.data.product == null) {
+            debugPrint('Product $productId not found, adding it...');
+            await _connector.addProduct(
+              id: productId,
+              name: productName,
+              price: productPrice,
+            ).execute();
+            debugPrint('Product $productId added successfully');
+          }
+
+          final isWeightBased = item.containsKey('weight');
+          var itemMutation = _connector.addFactureItem(
+            factureId: factureId,
+            productId: productId,
+          );
+          
+          if (isWeightBased) {
+            final double w = (item['weight'] as num).toDouble();
+            debugPrint('Adding weight-based item: $w kg');
+            itemMutation.weight(w);
+          } else {
+            final int q = (item['quantity'] as num).toInt();
+            debugPrint('Adding quantity-based item: $q units');
+            itemMutation.quantity(q);
+          }
+          
+          await itemMutation.execute();
+          debugPrint('Item $productId added to facture');
+        } catch (itemError) {
+          debugPrint('Error saving item $productId: $itemError');
+          // If product add failed because it exists, we might want to continue
+          if (itemError.toString().contains('already exists')) {
+            debugPrint('Product already exists, continuing...');
+            // Re-try adding the item link
+            final isWeightBased = item.containsKey('weight');
+            var retryMutation = _connector.addFactureItem(factureId: factureId, productId: productId);
+            if (isWeightBased) {
+              retryMutation.weight((item['weight'] as num).toDouble());
+            } else {
+              retryMutation.quantity((item['quantity'] as num).toInt());
+            }
+            await retryMutation.execute();
+          } else {
+            throw Exception('Failed to save item "$productName": $itemError');
+          }
+        }
       }
 
+      debugPrint('Facture saved successfully!');
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Facture created successfully!')),
       );
@@ -172,8 +246,22 @@ class _FacturePageState extends State<FacturePage> {
         _factureItems.clear();
       });
     } catch (e) {
+      debugPrint('Global error saving facture: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error saving facture: $e')),
+        SnackBar(
+          content: Text('Error saving facture: $e'),
+          duration: const Duration(seconds: 10),
+          action: SnackBarAction(label: 'Details', onPressed: () {
+            showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text('Save Error'),
+                content: SingleChildScrollView(child: Text(e.toString())),
+                actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text('Close'))],
+              ),
+            );
+          }),
+        ),
       );
     } finally {
       setState(() => _isLoading = false);
